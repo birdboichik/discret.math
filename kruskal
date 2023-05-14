@@ -1,0 +1,54 @@
+static void Main(string[] args)
+    {
+        int[,] graph = new int[,]
+        {
+            {0, 2, 3, 0},
+            {2, 0, 5, 0},
+            {3, 5, 0, 6},
+            {0, 0, 6, 0},
+        };
+
+        List<(int, int, int)> matrix = Kruskal(graph);
+        Console.WriteLine("Минимальное остовное дерево: ");
+
+        foreach ((int v, int u, int weight) in matrix)
+            Console.WriteLine($"({v},{u}): {weight}");
+    }
+
+    static List<(int, int, int)> Kruskal(int[,] graph)
+    {
+        List<(int, int, int)> edges = new List<(int, int, int)>();
+        for (int v = 0; v < graph.GetLength(0); v++) // по строкам
+        {
+            for (int u = v + 1; u < graph.GetLength(0); u++)
+            {
+                if (graph[v, u] != 0)
+                    edges.Add((graph[v, u], v, u));
+            }
+        }
+
+        edges.Sort();
+        List<(int, int, int)> matrix = new List<(int, int, int)>();
+        List<HashSet<int>> sets = new List<HashSet<int>>();
+
+        for (int i = 0; i < graph.GetLength(0); i++)
+            sets.Add(new HashSet<int>() { i });
+
+        while (matrix.Count != graph.GetLength(0) - 1)  
+        {
+            (int weight, int v, int u) = edges[0];
+            edges.RemoveAt(0);
+            if (!sets[v].SetEquals(sets[u]))
+            {
+                matrix.Add((v, u, weight));
+                HashSet<int> set_v = sets[v];
+                HashSet<int> set_u = sets[u];
+                HashSet<int> new_set = new HashSet<int>(set_v);
+                new_set.UnionWith(set_u);
+
+                foreach (int i in new_set)
+                    sets[i] = new_set;
+            }
+        }
+        return matrix;
+    }
